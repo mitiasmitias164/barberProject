@@ -15,6 +15,10 @@ export type Establishment = {
     address: string | null
     owner_id: string
     created_at: string
+    opening_time: string | null
+    closing_time: string | null
+    lunch_start: string | null
+    lunch_end: string | null
 }
 
 export type Service = {

@@ -1,0 +1,7 @@
+src/pages/dashboard/dashboard.tsx(2,42): error TS6133: 'isToday' is declared but its value is never read.
+src/pages/dashboard/dashboard.tsx(2,51): error TS6133: 'addDays' is declared but its value is never read.
+src/pages/dashboard/dashboard.tsx(2,72): error TS6133: 'endOfDay' is declared but its value is never read.
+src/pages/dashboard/dashboard.tsx(2,115): error TS6133: 'isWithinInterval' is declared but its value is never read.
+src/pages/dashboard/dashboard.tsx(2,133): error TS6133: 'parseISO' is declared but its value is never read.
+src/pages/dashboard/dashboard.tsx(4,22): error TS6133: 'CalendarIcon' is declared but its value is never read.
+src/pages/dashboard/dashboard.tsx(4,80): error TS6133: 'Scissors' is declared but its value is never read.

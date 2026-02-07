@@ -13,7 +13,7 @@ import { AuthProvider, useAuth } from "@/contexts/auth-context"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DashboardLayout } from "@/layouts/dashboard-layout"
-import { AgendaPage } from "@/pages/dashboard/agenda"
+import { DashboardPage } from "@/pages/dashboard/dashboard"
 import { ClientsPage } from "@/pages/dashboard/clients"
 import { FinancialPage } from "@/pages/dashboard/financial"
 import { SettingsPage } from "@/pages/dashboard/settings"
@@ -106,7 +106,7 @@ function App() {
             <Route path="/b/:slug" element={<PublicProfile />} />
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<AgendaPage />} />
+                <Route index element={<DashboardPage />} />
                 <Route path="clients" element={<ClientsPage />} />
                 <Route path="financial" element={<FinancialPage />} />
                 <Route path="settings" element={<SettingsPage />} />
