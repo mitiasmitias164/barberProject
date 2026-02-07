@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Scissors, AlertCircle, Loader2, User } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function Login() {
     const [isSignUp] = useState(false)
@@ -61,7 +62,11 @@ export function Login() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+        <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 relative">
+            {/* Theme toggle in top-right corner */}
+            <div className="absolute top-4 right-4">
+                <ThemeToggle />
+            </div>
             <Card className="w-full max-w-sm">
                 <CardHeader className="text-center">
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">

@@ -9,6 +9,7 @@ import { Scissors, Loader2, Check, ArrowRight, ArrowLeft, User, Store } from "lu
 import { toast, Toaster } from "react-hot-toast"
 import { z } from "zod"
 import { useAuth } from "@/contexts/auth-context"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 // Schemas for validation
 const step1Schema = z.object({
@@ -205,7 +206,11 @@ export function Register() {
     const totalSteps = role === 'client' ? 1 : 3
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+        <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4 relative">
+            {/* Theme toggle in top-right corner */}
+            <div className="absolute top-4 right-4">
+                <ThemeToggle />
+            </div>
             <Toaster position="top-center" />
             <Card className="w-full max-w-lg">
                 <CardHeader className="text-center">

@@ -29,12 +29,12 @@ export type Appointment = {
     establishment_id: string
     cliente_id: string | null
     barbeiro_id: string
-    service_id: string
+    service_id: string | null
     data_hora_inicio: string
     data_hora_fim: string
     status: AppointmentStatus
-    profiles?: { nome: string } // Optional because client might be null
-    services: { nome: string; preco: number }
+    profiles?: { nome: string } // Optional because client might be null for blocked slots
+    services?: { nome: string; preco: number } // Optional for blocked slots
 }
 export type Service = {
     id: string

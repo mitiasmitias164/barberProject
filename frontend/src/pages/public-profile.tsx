@@ -2,6 +2,7 @@ import { useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Scissors, MapPin } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function PublicProfile() {
     const { slug } = useParams()
@@ -10,11 +11,12 @@ export function PublicProfile() {
         <div className="min-h-screen bg-muted/30">
             {/* Header */}
             <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container flex h-14 items-center">
+                <div className="container flex h-14 items-center justify-between">
                     <div className="flex items-center gap-2 font-bold text-xl">
                         <Scissors className="h-6 w-6" />
                         <span>BarberManager</span>
                     </div>
+                    <ThemeToggle />
                 </div>
             </header>
 

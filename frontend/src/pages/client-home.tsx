@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/auth-context"
 import { Calendar, LogOut, Search, Scissors } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { useNavigate } from "react-router-dom"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export function ClientHome() {
     const { user, profile } = useAuth()
@@ -27,6 +28,7 @@ export function ClientHome() {
                         <span className="text-sm text-muted-foreground hidden sm:inline-block">
                             Olá, {profile?.nome || user?.email}
                         </span>
+                        <ThemeToggle />
                         <Button variant="ghost" size="icon" onClick={handleLogout}>
                             <LogOut className="h-5 w-5" />
                         </Button>

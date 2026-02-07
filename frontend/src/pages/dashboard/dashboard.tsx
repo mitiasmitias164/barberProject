@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { format, startOfWeek, endOfWeek, isSameDay, addMinutes } from "date-fns"
+import { format, startOfWeek, endOfWeek, isSameDay, addMinutes, setHours, setMinutes as setMins } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { DollarSign, Users, Clock, Share2, Settings } from "lucide-react"
+import { DollarSign, Users, Clock, Share2, Settings, Ban } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -66,6 +66,15 @@ export function DashboardPage() {
     const [bookingData, setBookingData] = useState({
         clientId: "",
         serviceId: ""
+    })
+
+    // Blocking State
+    const [isBlockingOpen, setIsBlockingOpen] = useState(false)
+    const [blockingData, setBlockingData] = useState({
+        date: format(new Date(), 'yyyy-MM-dd'),
+        startTime: "09:00",
+        endTime: "10:00",
+        isFullDay: false
     })
 
     useEffect(() => {
@@ -238,6 +247,60 @@ export function DashboardPage() {
         }
     }
 
+    const handleCreateBlock = async () => {
+        if (!blockingData.date) {
+            toast.error("Selecione uma data")
+            return
+        }
+
+        try {
+            const selectedDate = new Date(blockingData.date + 'T00:00:00')
+            let startDateTime, endDateTime
+
+            if (blockingData.isFullDay) {
+                // Full day block: from opening to closing time
+                const [openHour, openMin] = scheduleSettings.openingTime.split(':').map(Number)
+                const [closeHour, closeMin] = scheduleSettings.closingTime.split(':').map(Number)
+                startDateTime = setMins(setHours(selectedDate, openHour), openMin)
+                endDateTime = setMins(setHours(selectedDate, closeHour), closeMin)
+            } else {
+                // Specific time block
+                const [startHour, startMin] = blockingData.startTime.split(':').map(Number)
+                const [endHour, endMin] = blockingData.endTime.split(':').map(Number)
+                startDateTime = setMins(setHours(selectedDate, startHour), startMin)
+                endDateTime = setMins(setHours(selectedDate, endHour), endMin)
+            }
+
+            const { error } = await supabase
+                .from('appointments')
+                .insert({
+                    establishment_id: establishment?.id,
+                    barbeiro_id: user?.id,
+                    cliente_id: null,
+                    service_id: null,
+                    data_hora_inicio: startDateTime.toISOString(),
+                    data_hora_fim: endDateTime.toISOString(),
+                    status: 'bloqueio'
+                })
+
+            if (error) {
+                if (error.code === '23P01') {
+                    toast.error("Conflito! Já existe um agendamento neste período.")
+                } else {
+                    throw error
+                }
+                return
+            }
+
+            toast.success(blockingData.isFullDay ? "Dia bloqueado com sucesso!" : "Horário bloqueado com sucesso!")
+            setIsBlockingOpen(false)
+            fetchDashboardData()
+        } catch (error) {
+            console.error(error)
+            toast.error("Erro ao criar bloqueio")
+        }
+    }
+
     const copyShareLink = () => {
         const link = `${window.location.origin}/b/${establishment?.slug}`
         navigator.clipboard.writeText(link)
@@ -351,6 +414,70 @@ export function DashboardPage() {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
+                        <Dialog open={isBlockingOpen} onOpenChange={setIsBlockingOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm" className="w-full justify-start px-2">
+                                    <Ban className="mr-2 h-4 w-4" /> Bloquear Horários
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                    <DialogTitle>Bloquear Horários</DialogTitle>
+                                    <DialogDescription>
+                                        Defina feriados ou períodos indisponíveis.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="blockDate" className="text-right">Data</Label>
+                                        <Input
+                                            id="blockDate"
+                                            type="date"
+                                            value={blockingData.date}
+                                            onChange={(e) => setBlockingData({ ...blockingData, date: e.target.value })}
+                                            className="col-span-3"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-4 items-center gap-4">
+                                        <Label htmlFor="fullDay" className="text-right">Dia Inteiro</Label>
+                                        <Input
+                                            id="fullDay"
+                                            type="checkbox"
+                                            checked={blockingData.isFullDay}
+                                            onChange={(e) => setBlockingData({ ...blockingData, isFullDay: e.target.checked })}
+                                            className="col-span-3 w-6 h-6"
+                                        />
+                                    </div>
+                                    {!blockingData.isFullDay && (
+                                        <>
+                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                <Label htmlFor="startTime" className="text-right">Início</Label>
+                                                <Input
+                                                    id="startTime"
+                                                    type="time"
+                                                    value={blockingData.startTime}
+                                                    onChange={(e) => setBlockingData({ ...blockingData, startTime: e.target.value })}
+                                                    className="col-span-3"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-4 items-center gap-4">
+                                                <Label htmlFor="endTime" className="text-right">Fim</Label>
+                                                <Input
+                                                    id="endTime"
+                                                    type="time"
+                                                    value={blockingData.endTime}
+                                                    onChange={(e) => setBlockingData({ ...blockingData, endTime: e.target.value })}
+                                                    className="col-span-3"
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                                <DialogFooter>
+                                    <Button onClick={handleCreateBlock}>Criar Bloqueio</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </CardContent>
                 </Card>
             </div>
@@ -359,7 +486,7 @@ export function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-7 flex-1 min-h-0">
                 {/* Timeline & Actions */}
                 <Card className="md:col-span-5 h-full flex flex-col overflow-hidden">
-                    <CardHeader className="shrink-0 p-4 border-b">
+                    <CardHeader className="shrink-0 p-4 border-b border-border/40">
                         {/* Header handled by Agenda component internally or we can keep title here */}
                     </CardHeader>
                     <CardContent className="flex-1 p-0 overflow-hidden">
@@ -431,7 +558,7 @@ export function DashboardPage() {
                             <div className="space-y-4 text-sm">
                                 {appointments.filter(a => a.status === 'concluido').slice(0, 5).length > 0 ? (
                                     appointments.filter(a => a.status === 'concluido').slice(0, 5).map(app => (
-                                        <div key={app.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                                        <div key={app.id} className="flex items-center justify-between border-b border-border/30 pb-2 last:border-0 last:pb-0">
                                             <div>
                                                 <p className="font-medium">{app.profiles.nome}</p>
                                                 <p className="text-xs text-muted-foreground">{format(new Date(app.data_hora_inicio), "dd/MM 'às' HH:mm")}</p>

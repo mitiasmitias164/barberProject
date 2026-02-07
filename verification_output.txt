@@ -1,0 +1,56 @@
+﻿======================================================================
+uv : Traceback (most 
+recent call last):
+No linha:1 
+caractere:1
++ uv run python verif
+icar_migracao.py 
+2>&1 | Out-File 
+-FilePath verific ...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (Traceba   
+ ck (most recent     
+call last)::Stri    
+ng) [], RemoteEx    
+ception
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  File "C:\Projetos\b
+arbearia\verificar_mi
+gracao.py", line 26, 
+in <module>
+    print("  
+\U0001f527 MigraþÒo 
+Completa - Feature 
+de Disponibilidade")
+    ~~~~~^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^
+  File "C:\Users\math
+e\AppData\Local\Progr
+ams\Python\Python313\
+Lib\encodings\cp1252.
+py", line 19, in 
+encode
+    return codecs.cha
+rmap_encode(input,sel
+f.errors,encoding_tab
+le)[0]
+           ~~~~~~~~~~
+~~~~~~~~~~~^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+^^^
+UnicodeEncodeError: 
+'charmap' codec 
+can't encode 
+character 
+'\U0001f527' in 
+position 2: 
+character maps to 
+<undefined>

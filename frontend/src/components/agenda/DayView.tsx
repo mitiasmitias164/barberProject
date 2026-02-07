@@ -72,7 +72,7 @@ export function DayView({ date, appointments, openingTime, closingTime, onSlotCl
                 {hours.map((hour, i) => {
                     const top = ((hour.getHours() * 60 + hour.getMinutes()) - startOfDayMinutes) * PIXELS_PER_MINUTE
                     return (
-                        <div key={i} className="absolute w-full border-t border-zinc-100 dark:border-zinc-800 flex items-center group pointer-events-none" style={{ top: `${top}px` }}>
+                        <div key={i} className="absolute w-full border-t border-zinc-200 dark:border-zinc-700/40 flex items-center group pointer-events-none" style={{ top: `${top}px` }}>
                             <span className="bg-white dark:bg-zinc-950 px-2 text-xs text-muted-foreground -mt-3 ml-2 font-mono">
                                 {format(hour, 'HH:mm')}
                             </span>
