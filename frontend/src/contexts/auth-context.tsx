@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useRef } from "react"
 import { type Session, type User } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
 import type { Profile, Establishment } from "@/types/db"
@@ -31,7 +31,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchProfileData = async (userId: string) => {
+    // Cache to prevent duplicate/parallel fetches for the same user
+    const lastFetchedUserId = useRef<string | null>(null)
+
+    const fetchProfileData = async (userId: string, force = false) => {
+        // Prevent duplicate fetches if not forced
+        if (!force && lastFetchedUserId.current === userId) {
+            console.log("[Auth] Profile fetch skipped (cached/deduplicated).")
+            return
+        }
+
+        // Mark as fetched/fetching immediately
+        lastFetchedUserId.current = userId
+
         try {
             console.log("Buscando perfil...")
 
@@ -72,9 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
                     if (estError) {
                         console.error("Erro ao buscar estabelecimento:", estError)
-                        // Handle RLS or empty result logic here if needed
-                        // User requirement: "Garanta que, se o Supabase retornar um array vazio ou erro de RLS, o sistema exiba uma mensagem amigável"
-                        // Since .single() returns error on 0 rows, we catch it here mostly.
                     } else {
                         setEstablishment(estData)
                     }
@@ -88,6 +97,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         } catch (error: any) {
             console.error("Unexpected error in fetchProfileData:", error)
+            // Reset cache on error to allow retry
+            lastFetchedUserId.current = null
+
             if (error.message === "Tempo limite excedido") {
                 setError("Não conseguimos carregar seu perfil. Clique aqui para tentar novamente")
             } else {
@@ -99,7 +111,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const refreshProfile = async () => {
         if (user) {
             setError(null)
-            await fetchProfileData(user.id)
+            // Force refresh ignores cache
+            await fetchProfileData(user.id, true)
         }
     }
 
@@ -125,20 +138,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (mounted) {
+                // Ignore token refresh events
+                if (event === "TOKEN_REFRESHED") {
+                    return
+                }
+
                 setSession(session)
                 setUser(session?.user ?? null)
 
                 if (session?.user) {
-                    setLoading(true)
+                    // Only show loading on critical events
+                    if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+                        setLoading(true)
+                    }
+
                     setError(null)
+                    // Normal fetch (cached)
                     await fetchProfileData(session.user.id)
                     setLoading(false)
                 } else {
                     setProfile(null)
                     setEstablishment(null)
                     setLoading(false)
+                    lastFetchedUserId.current = null // Clear cache on logout
                 }
             }
         })
