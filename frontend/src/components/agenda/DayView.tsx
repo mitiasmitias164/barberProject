@@ -66,7 +66,7 @@ export function DayView({ date, appointments, openingTime, closingTime, onSlotCl
     }
 
     return (
-        <div className="relative h-full overflow-y-auto bg-white dark:bg-zinc-950" style={{ maxHeight: '600px' }}>
+        <div className="relative h-full overflow-y-auto bg-white dark:bg-zinc-950">
             {/* Time Grid */}
             <div className="relative" style={{ height: `${totalMinutes * PIXELS_PER_MINUTE}px` }} onClick={handleBackgroundClick}>
                 {hours.map((hour, i) => {

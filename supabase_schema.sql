@@ -8,7 +8,8 @@ CREATE TABLE establishments (
     slug TEXT NOT NULL UNIQUE,
     address TEXT,
     owner_id UUID REFERENCES auth.users(id) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    slot_duration INTEGER NOT NULL DEFAULT 30
 );
 
 -- Update profiles table (Using CREATE OR REPLACE or ALTER logic for idempotency if running iteratively, but here defining the desired final state)

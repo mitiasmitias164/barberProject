@@ -54,10 +54,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
             // Actual fetch logic wrapped in a promise
             const fetchData = async () => {
-                // Fetch Profile
-                const { data: profileData, error: profileError } = await supabase
+                // Fetch Profile and Establishment in one go
+                const { data, error: profileError } = await supabase
                     .from("profiles")
-                    .select("*")
+                    .select("*, establishment:establishments(*)")
                     .eq("id", userId)
                     .single()
 
@@ -71,24 +71,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     throw profileError
                 }
 
+                // Desestruturar para separar perfil e estabelecimento
+                const { establishment: establishmentData, ...profileData } = data
+
                 setProfile(profileData)
 
-                // Fetch Establishment if linked
-                if (profileData?.establishment_id) {
-                    console.log("Buscando estabelecimento...")
-                    const { data: estData, error: estError } = await supabase
-                        .from("establishments")
-                        .select("*")
-                        .eq("id", profileData.establishment_id)
-                        .single()
-
-                    if (estError) {
-                        console.error("Erro ao buscar estabelecimento:", estError)
-                    } else {
-                        setEstablishment(estData)
-                    }
+                // Supabase returns the joined data as a single object if the relation is Many-to-One
+                // or null if no relation exists.
+                if (establishmentData) {
+                    // Ensure it matches Establishment type (it might be an array if relation is One-to-Many but standard FK on profile->establishment implies Many-to-One)
+                    // If it is an array, take the first one? No, profiles.establishment_id -> establishments.id means it is One-to-One or Many-to-One (Profile belongs to Establishment)
+                    // So it should be an object.
+                    setEstablishment(establishmentData as any)
                 } else {
-                    console.log("Usuário não possui estabelecimento vinculado no perfil.")
                     setEstablishment(null)
                 }
             }

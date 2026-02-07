@@ -28,7 +28,7 @@ export function Login() {
             return
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         })
@@ -43,7 +43,7 @@ export function Login() {
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('role')
-                .eq('id', (await supabase.auth.getUser()).data.user?.id)
+                .eq('id', data.user.id)
                 .single()
 
             if (profile?.role === 'client') {

@@ -358,24 +358,22 @@ export function DashboardPage() {
             {/* Timeline & Actions */}
             <div className="grid gap-4 md:grid-cols-7 flex-1 min-h-0">
                 {/* Timeline & Actions */}
-                <div className="grid gap-4 md:grid-cols-7 flex-1 min-h-0">
-                    <Card className="md:col-span-5 h-full flex flex-col overflow-hidden">
-                        <CardHeader className="shrink-0 p-4 border-b">
-                            {/* Header handled by Agenda component internally or we can keep title here */}
-                        </CardHeader>
-                        <CardContent className="flex-1 p-0 overflow-hidden">
-                            {establishment && (
-                                <Agenda
-                                    establishmentId={establishment.id}
-                                    openingTime={scheduleSettings.openingTime}
-                                    closingTime={scheduleSettings.closingTime}
-                                    slotDuration={establishment.slot_duration || 30}
-                                    onBookingRequest={handleBookSlot}
-                                />
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
+                <Card className="md:col-span-5 h-full flex flex-col overflow-hidden">
+                    <CardHeader className="shrink-0 p-4 border-b">
+                        {/* Header handled by Agenda component internally or we can keep title here */}
+                    </CardHeader>
+                    <CardContent className="flex-1 p-0 overflow-hidden">
+                        {establishment && (
+                            <Agenda
+                                establishmentId={establishment.id}
+                                openingTime={scheduleSettings.openingTime}
+                                closingTime={scheduleSettings.closingTime}
+                                slotDuration={establishment.slot_duration || 30}
+                                onBookingRequest={handleBookSlot}
+                            />
+                        )}
+                    </CardContent>
+                </Card>
 
                 {/* Recent History */}
                 <Card className="md:col-span-2 h-full flex flex-col overflow-hidden">
