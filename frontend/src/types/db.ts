@@ -19,8 +19,23 @@ export type Establishment = {
     closing_time: string | null
     lunch_start: string | null
     lunch_end: string | null
+    slot_duration: number
 }
 
+export type AppointmentStatus = 'agendado' | 'concluido' | 'cancelado' | 'bloqueio'
+
+export type Appointment = {
+    id: string
+    establishment_id: string
+    cliente_id: string | null
+    barbeiro_id: string
+    service_id: string
+    data_hora_inicio: string
+    data_hora_fim: string
+    status: AppointmentStatus
+    profiles?: { nome: string } // Optional because client might be null
+    services: { nome: string; preco: number }
+}
 export type Service = {
     id: string
     establishment_id: string

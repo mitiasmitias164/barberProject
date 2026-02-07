@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { format, startOfWeek, endOfWeek, startOfDay, isSameDay, setHours, setMinutes, addMinutes } from "date-fns"
+import { format, startOfWeek, endOfWeek, isSameDay, addMinutes } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { DollarSign, Users, Clock, Check, X, Share2, AlertTriangle, Settings, Plus } from "lucide-react"
+import { DollarSign, Users, Clock, Share2, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/contexts/auth-context"
 import { toast } from "react-hot-toast"
+import { Agenda } from "@/components/agenda/Agenda"
 
 interface Appointment {
     id: string
@@ -49,7 +50,6 @@ export function DashboardPage() {
         nextClient: null
     })
     const [appointments, setAppointments] = useState<Appointment[]>([])
-    const [loading, setLoading] = useState(true)
     const [scheduleSettings, setScheduleSettings] = useState({
         openingTime: "08:00",
         closingTime: "20:00",
@@ -108,7 +108,6 @@ export function DashboardPage() {
 
     const fetchDashboardData = async () => {
         try {
-            setLoading(true)
             const today = new Date()
             const startWeek = startOfWeek(today)
             const endWeek = endOfWeek(today)
@@ -163,25 +162,11 @@ export function DashboardPage() {
             console.error("Error fetching dashboard data:", error)
             toast.error("Erro ao carregar dados do dashboard")
         } finally {
-            setLoading(false)
+            // loading removed
         }
     }
 
-    const handleStatusChange = async (id: string, newStatus: 'concluido' | 'cancelado') => {
-        try {
-            const { error } = await supabase
-                .from('appointments')
-                .update({ status: newStatus })
-                .eq('id', id)
 
-            if (error) throw error
-
-            toast.success(`Agendamento ${newStatus === 'concluido' ? 'concluído' : 'cancelado'}!`)
-            fetchDashboardData()
-        } catch (error) {
-            toast.error("Erro ao atualizar status")
-        }
-    }
 
     const handleBookSlot = (slot: Date) => {
         setSelectedSlot(slot)
@@ -259,18 +244,14 @@ export function DashboardPage() {
         toast.success("Link copiado para a área de transferência!")
     }
 
-    const timeSlots = []
-    const startHour = parseInt(scheduleSettings.openingTime.split(':')[0])
-    const endHour = parseInt(scheduleSettings.closingTime.split(':')[0])
 
-    for (let i = startHour; i <= endHour; i++) {
-        timeSlots.push(setHours(startOfDay(new Date()), i))
-    }
+
+    const { nextClient } = stats
 
     return (
-        <div className="space-y-6">
+        <div className="h-full flex flex-col space-y-6">
             {/* Top Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="shrink-0 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Ganhos da Semana</CardTitle>
@@ -297,8 +278,8 @@ export function DashboardPage() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.nextClient ? format(new Date(stats.nextClient.data_hora_inicio), 'HH:mm') : '--:--'}</div>
-                        <p className="text-xs text-muted-foreground">{stats.nextClient ? stats.nextClient.profiles.nome : 'Nenhum agendamento'}</p>
+                        <div className="text-2xl font-bold">{nextClient ? format(new Date(nextClient.data_hora_inicio), 'HH:mm') : '--:--'}</div>
+                        <p className="text-xs text-muted-foreground">{nextClient ? nextClient.profiles.nome : 'Nenhum agendamento'}</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -375,108 +356,36 @@ export function DashboardPage() {
             </div>
 
             {/* Timeline & Actions */}
-            <div className="grid gap-4 md:grid-cols-7">
-                <Card className="md:col-span-5">
-                    <CardHeader>
-                        <CardTitle>Agenda de Hoje</CardTitle>
-                        <CardDescription>
-                            {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            {loading ? (
-                                <p className="text-center text-muted-foreground">Carregando agenda...</p>
-                            ) : (
-                                timeSlots.map((slot, index) => {
-                                    const slotEnd = setMinutes(setHours(slot, slot.getHours() + 1), 0)
-
-                                    const slotAppointments = appointments.filter(app => {
-                                        const appStart = new Date(app.data_hora_inicio)
-                                        return appStart >= slot && appStart < slotEnd && app.status !== 'cancelado'
-                                    })
-
-                                    const isLunchTime = (
-                                        format(slot, 'HH:mm') >= scheduleSettings.lunchStart &&
-                                        format(slot, 'HH:mm') < scheduleSettings.lunchEnd
-                                    )
-
-                                    return (
-                                        <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 border-b pb-4 last:border-0 relative">
-                                            <div className="w-16 text-sm font-medium text-muted-foreground">
-                                                {format(slot, 'HH:mm')}
-                                            </div>
-                                            <div className="flex-1 w-full">
-                                                {isLunchTime ? (
-                                                    <div className="flex items-center gap-2 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 text-orange-600">
-                                                        <Clock className="h-4 w-4" />
-                                                        <span className="font-medium">Horário de Almoço</span>
-                                                    </div>
-                                                ) : slotAppointments.length > 0 ? (
-                                                    <div className="space-y-2">
-                                                        {slotAppointments.map(app => (
-                                                            <div key={app.id} className="flex items-center justify-between p-3 rounded-lg bg-accent/50 border border-accent">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-                                                                        {app.profiles.nome ? app.profiles.nome.charAt(0) : '?'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-medium">{app.profiles.nome}</p>
-                                                                        <p className="text-xs text-muted-foreground">
-                                                                            {app.services.nome} • {format(new Date(app.data_hora_inicio), 'HH:mm')} - {format(new Date(app.data_hora_fim), 'HH:mm')}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    {app.status === 'agendado' && (
-                                                                        <>
-                                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-500 hover:text-green-600 hover:bg-green-500/10" onClick={() => handleStatusChange(app.id, 'concluido')}>
-                                                                                <Check className="h-4 w-4" />
-                                                                            </Button>
-                                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => handleStatusChange(app.id, 'cancelado')}>
-                                                                                <X className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </>
-                                                                    )}
-                                                                    {app.status === 'concluido' && <span className="text-xs font-medium text-green-500 px-2 py-1 bg-green-500/10 rounded-full">Concluído</span>}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                        {slotAppointments.length > 1 && (
-                                                            <div className="flex items-center gap-2 text-xs text-red-500 font-medium mt-1">
-                                                                <AlertTriangle className="h-3 w-3" />
-                                                                Conflito de horários detectado!
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <Button
-                                                        variant="outline"
-                                                        className="w-full border-dashed text-muted-foreground hover:text-primary hover:border-primary/50 justify-start"
-                                                        size="sm"
-                                                        onClick={() => handleBookSlot(slot)}
-                                                    >
-                                                        <Plus className="mr-2 h-4 w-4" /> Reservar horário
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                })
+            <div className="grid gap-4 md:grid-cols-7 flex-1 min-h-0">
+                {/* Timeline & Actions */}
+                <div className="grid gap-4 md:grid-cols-7 flex-1 min-h-0">
+                    <Card className="md:col-span-5 h-full flex flex-col overflow-hidden">
+                        <CardHeader className="shrink-0 p-4 border-b">
+                            {/* Header handled by Agenda component internally or we can keep title here */}
+                        </CardHeader>
+                        <CardContent className="flex-1 p-0 overflow-hidden">
+                            {establishment && (
+                                <Agenda
+                                    establishmentId={establishment.id}
+                                    openingTime={scheduleSettings.openingTime}
+                                    closingTime={scheduleSettings.closingTime}
+                                    slotDuration={establishment.slot_duration || 30}
+                                    onBookingRequest={handleBookSlot}
+                                />
                             )}
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Recent History */}
-                <Card className="md:col-span-2">
-                    <CardHeader>
+                <Card className="md:col-span-2 h-full flex flex-col overflow-hidden">
+                    <CardHeader className="shrink-0">
                         <CardTitle>Histórico Recente</CardTitle>
                         <CardDescription>
                             Últimos cortes finalizados
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="flex-1 overflow-y-auto">
                         <div className="space-y-4">
                             {/* Booking Dialog */}
                             <Dialog open={isBookingOpen} onOpenChange={setIsBookingOpen}>
