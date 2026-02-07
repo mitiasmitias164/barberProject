@@ -36,9 +36,21 @@ export function Login() {
         if (error) {
             setError(error.message)
         } else {
-            // Clear guest flag if real login succeeds
+            // Clear guest flag
             localStorage.removeItem('barber-guest')
-            navigate("/dashboard")
+
+            // Fetch profile to check role
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', (await supabase.auth.getUser()).data.user?.id)
+                .single()
+
+            if (profile?.role === 'client') {
+                navigate("/client/home")
+            } else {
+                navigate("/dashboard")
+            }
         }
         setLoading(false)
     }

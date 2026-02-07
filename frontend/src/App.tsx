@@ -17,6 +17,7 @@ import { DashboardPage } from "@/pages/dashboard/dashboard"
 import { ClientsPage } from "@/pages/dashboard/clients"
 import { FinancialPage } from "@/pages/dashboard/financial"
 import { SettingsPage } from "@/pages/dashboard/settings"
+import { ClientHome } from "@/pages/client-home"
 
 function LandingPage() {
   return (
@@ -105,6 +106,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/b/:slug" element={<PublicProfile />} />
             <Route element={<ProtectedRoute />}>
+              <Route path="/client/home" element={<ClientHome />} />
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="clients" element={<ClientsPage />} />

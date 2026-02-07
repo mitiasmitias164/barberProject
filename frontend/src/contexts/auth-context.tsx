@@ -10,7 +10,7 @@ type AuthContextType = {
     establishment: Establishment | null
     loading: boolean
     error: string | null
-    refreshProfile: () => Promise<void>
+    refreshProfile: (userId?: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -108,11 +108,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
-    const refreshProfile = async () => {
-        if (user) {
+    const refreshProfile = async (userId?: string) => {
+        const targetId = userId || user?.id
+        if (targetId) {
             setError(null)
             // Force refresh ignores cache
-            await fetchProfileData(user.id, true)
+            await fetchProfileData(targetId, true)
         }
     }
 
