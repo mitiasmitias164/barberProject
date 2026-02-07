@@ -28,7 +28,7 @@ export function MonthView({ date, appointments, onSlotClick }: MonthViewProps) {
                 {calendarDays.map((day, index) => {
                     const dayAppointments = appointments.filter(a => new Date(a.data_hora_inicio).getDate() === day.getDate() && new Date(a.data_hora_inicio).getMonth() === day.getMonth())
                     return (
-                        <div key={index} className={`border p-1 min-h-[80px] cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900 ${format(day, 'MM') !== format(date, 'MM') ? 'opacity-30' : ''}`} onClick={() => onSlotClick(day)}>
+                        <div key={index} className={`border border-border/40 p-1 min-h-[80px] cursor-pointer hover:bg-muted/50 transition-colors ${format(day, 'MM') !== format(date, 'MM') ? 'opacity-30' : ''}`} onClick={() => onSlotClick(day)}>
                             <div className="text-right text-xs font-medium">{format(day, "d")}</div>
                             <div className="text-[10px] text-center mt-1 text-muted-foreground">
                                 {dayAppointments.length > 0 && `${dayAppointments.length} agd.`}

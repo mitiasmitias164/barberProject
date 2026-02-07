@@ -23,7 +23,7 @@ export function WeekView({ date, appointments, onSlotClick }: WeekViewProps) {
                     const dayAppointments = appointments.filter(a => new Date(a.data_hora_inicio).getDate() === day.getDate())
 
                     return (
-                        <div key={index} className="border rounded-md p-2 min-h-[200px]" onClick={() => onSlotClick(day)}>
+                        <div key={index} className="border border-border/40 rounded-md p-2 min-h-[200px] cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onSlotClick(day)}>
                             <div className="text-center font-medium mb-2">{format(day, "EEE", { locale: ptBR })}</div>
                             <div className="text-center text-sm text-muted-foreground mb-4">{format(day, "dd")}</div>
                             <div className="text-xs text-muted-foreground text-center">

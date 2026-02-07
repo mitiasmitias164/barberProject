@@ -23,8 +23,8 @@ export function Sidebar() {
     ]
 
     return (
-        <div className="flex h-screen w-64 flex-col border-r bg-card">
-            <div className="flex h-14 items-center border-b px-6">
+        <div className="flex h-screen w-64 flex-col border-r border-border/40 bg-card">
+            <div className="flex h-14 items-center border-b border-border/40 px-6">
                 <Link className="flex items-center gap-2 font-semibold" to="/">
                     <Scissors className="h-6 w-6" />
                     <span>BarberManager</span>

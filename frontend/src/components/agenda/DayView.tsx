@@ -86,8 +86,8 @@ export function DayView({ date, appointments, openingTime, closingTime, onSlotCl
                     <div
                         key={app.id}
                         className={cn(
-                            "absolute left-16 right-4 rounded-md border p-2 text-xs transition-all hover:brightness-95 cursor-pointer shadow-sm overflow-hidden",
-                            app.status === 'agendado' && "bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300",
+                            "group absolute left-16 right-4 rounded-md border p-2 text-xs transition-all shadow-sm overflow-hidden",
+                            app.status === 'agendado' && "bg-blue-100 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 cursor-pointer hover:shadow-md",
                             app.status === 'concluido' && "bg-green-100 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-800 dark:text-green-300",
                             app.status === 'cancelado' && "bg-red-50 border-red-100 text-red-400 dark:bg-red-900/10 dark:border-red-900/30 opacity-60",
                             app.status === 'bloqueio' && "bg-gray-100 border-gray-200 text-gray-500 dark:bg-zinc-800 dark:border-zinc-700 repeating-linear-gradient(45deg,transparent,transparent_10px,#00000005_10px,#00000005_20px)"
@@ -97,19 +97,8 @@ export function DayView({ date, appointments, openingTime, closingTime, onSlotCl
                             height: `${app.height}px`,
                             minHeight: '28px'
                         }}
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            // Simple toggle for now or prompt
-                            if (app.status === 'agendado') {
-                                if (window.confirm("Deseja concluir este agendamento?")) {
-                                    onStatusChange(app.id, 'concluido')
-                                } else if (window.confirm("Deseja cancelar este agendamento?")) {
-                                    onStatusChange(app.id, 'cancelado')
-                                }
-                            }
-                        }}
                     >
-                        <div className="flex items-center gap-2 h-full">
+                        <div className="flex items-center justify-between gap-2 h-full">
                             {app.status !== 'bloqueio' && (
                                 <div className={cn("w-1 h-full absolute left-0 top-0 bottom-0",
                                     app.status === 'agendado' ? "bg-blue-500" :
@@ -117,7 +106,7 @@ export function DayView({ date, appointments, openingTime, closingTime, onSlotCl
                                 )} />
                             )}
 
-                            <div className="pl-2 flex flex-col justify-center">
+                            <div className="pl-2 flex-1 flex flex-col justify-center min-w-0">
                                 <div className="font-semibold truncate">
                                     {app.status === 'bloqueio' ? 'Bloqueado' : app.profiles?.nome || 'Cliente sem nome'}
                                 </div>
@@ -127,6 +116,34 @@ export function DayView({ date, appointments, openingTime, closingTime, onSlotCl
                                     </div>
                                 )}
                             </div>
+
+                            {/* Action buttons - show on hover for scheduled appointments */}
+                            {app.status === 'agendado' && app.height > 40 && (
+                                <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 pr-1">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onStatusChange(app.id, 'concluido')
+                                        }}
+                                        className="px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-[10px] rounded transition-colors"
+                                        title="Concluir"
+                                    >
+                                        ✓
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            if (window.confirm('Deseja cancelar este agendamento?')) {
+                                                onStatusChange(app.id, 'cancelado')
+                                            }
+                                        }}
+                                        className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-[10px] rounded transition-colors"
+                                        title="Cancelar"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ))}

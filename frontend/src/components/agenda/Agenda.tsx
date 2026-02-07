@@ -23,15 +23,7 @@ interface AgendaProps {
 export type ViewMode = 'day' | 'week' | 'month'
 
 export function Agenda({ establishmentId, openingTime, closingTime, onBookingRequest }: AgendaProps) {
-    const [view, setView] = useState<ViewMode>('day') // Default to 'day' as requested in prompt, checking requirement... 
-    // Wait, prompt said "Defina 'Semana' como a visualização padrão." (Set Week as default).
-    // But for MVP/First step let's stick to Day as it is easier to verify "Timeline Dinamica".
-    // I will stick to the requirement: "Defina 'Semana' como a visualização padrão." -> Okay, I will set 'week' later, but for now let's implement DayView first deeply.
-    // Actually, I'll set 'week' as default in the state but handle DayView primarily for now.
-
-    // Changing back to 'day' for initial implementation stability, will switch to 'week' once WeekView is ready.
-    // actually let's implement 'day' first as it maps better to "Timeline Dinamica" vertical view.
-
+    const [view, setView] = useState<ViewMode>('week') // Default view: Semanal
     const [currentDate, setCurrentDate] = useState(new Date())
     const [appointments, setAppointments] = useState<Appointment[]>([])
 
@@ -129,7 +121,7 @@ export function Agenda({ establishmentId, openingTime, closingTime, onBookingReq
                 </div>
             </div>
 
-            <div className="flex-1 border rounded-lg overflow-hidden bg-background">
+            <div className="flex-1 border border-border/40 rounded-lg overflow-hidden bg-background">
                 {view === 'day' && (
                     <DayView
                         date={currentDate}
